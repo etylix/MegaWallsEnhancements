@@ -78,6 +78,7 @@ public class MWE {
         ClientCommandHandler.instance.registerCommand(new CommandFKCounter());
         ClientCommandHandler.instance.registerCommand(new CommandNocheaters());
         ClientCommandHandler.instance.registerCommand(new CommandHypixelShout());
+        ClientCommandHandler.instance.registerCommand(new CommandArcanist());
 
     }
 
