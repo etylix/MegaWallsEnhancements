@@ -413,6 +413,12 @@ public class MWEConfig extends AbstractConfig {
 
     @ConfigProperty(
             category = PVP_STUFF, subCategory = "Potion HUD",
+            name = "Show Potion names",
+            comment = "Displays the full name of the potion effects next to the icons, only works with vertical display")
+    public static boolean showPotionEffectNames;
+
+    @ConfigProperty(
+            category = PVP_STUFF, subCategory = "Potion HUD",
             name = "Potion HUD Text Color",
             isColor = true)
     public static int potionHUDTextColor = 0xFFFFFF;
@@ -846,6 +852,12 @@ public class MWEConfig extends AbstractConfig {
                     + "§fWill become : \n"
                     + "§6+100 coins!§b FINAL KILL")
     public static boolean shortCoinMessage;
+
+    @ConfigProperty(
+            category = HYPIXEL,
+            name = "Warp Protection",
+            comment = "Adds confirmation when clicking the \"Play Again\" paper if you have players in your squad")
+    public static boolean warpProtection = true;
 
     @ConfigProperty(
             category = NOCHEATERS, subCategory = "General",

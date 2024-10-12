@@ -5,6 +5,7 @@ import fr.alexdoru.mwe.config.MWEConfig;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 
@@ -28,22 +29,31 @@ public class PotionHUD extends AbstractRenderer {
         final Collection<PotionEffect> potionEffects = mc.thePlayer.getActivePotionEffects();
         if (potionEffects.isEmpty()) return;
         int amountEffects = 0;
+        int maxWidth = 0;
         for (final PotionEffect potioneffect : potionEffects) {
             if (potioneffect.getDuration() == 0) continue;
             final Potion potion = Potion.potionTypes[potioneffect.getPotionID()];
             if (potion.hasStatusIcon()) {
                 amountEffects++;
+                if (!MWEConfig.horizontalPotionHUD && MWEConfig.showPotionEffectNames) {
+                    maxWidth = Math.max(maxWidth, mc.fontRendererObj.getStringWidth(getFormattedEffect(potioneffect, potion)));
+                }
             }
         }
         if (amountEffects == 0) return;
         final int width;
         final int height;
+        final int ICON_WIDTH = 27;
         if (MWEConfig.horizontalPotionHUD) {
-            width = (27 + 2) * amountEffects - 2;
-            height = 27 + 5;
+            width = (ICON_WIDTH + 2) * amountEffects - 2;
+            height = ICON_WIDTH + 5;
         } else {
-            width = 27;
-            height = (27 + 7) * amountEffects - 7;
+            if (MWEConfig.showPotionEffectNames) {
+                width = ICON_WIDTH + 4 + maxWidth;
+            } else {
+                width = ICON_WIDTH;
+            }
+            height = (ICON_WIDTH + 7) * amountEffects - 7;
         }
         this.guiPosition.updateAdjustedAbsolutePosition(resolution, width, height, -width / 2, -height / 2);
         this.renderPotionEffects(potionEffects, this.guiPosition.getAbsoluteRenderX(), this.guiPosition.getAbsoluteRenderY());
@@ -51,15 +61,31 @@ public class PotionHUD extends AbstractRenderer {
 
     @Override
     public void renderDummy() {
-        final int amountEffects = dummyList.size();
+        int amountEffects = 0;
+        int maxWidth = 0;
+        for (final PotionEffect potioneffect : dummyList) {
+            if (potioneffect.getDuration() == 0) continue;
+            final Potion potion = Potion.potionTypes[potioneffect.getPotionID()];
+            if (potion.hasStatusIcon()) {
+                amountEffects++;
+                if (!MWEConfig.horizontalPotionHUD && MWEConfig.showPotionEffectNames) {
+                    maxWidth = Math.max(maxWidth, mc.fontRendererObj.getStringWidth(getFormattedEffect(potioneffect, potion)));
+                }
+            }
+        }
         final int width;
         final int height;
+        final int ICON_WIDTH = 27;
         if (MWEConfig.horizontalPotionHUD) {
-            width = (27 + 2) * amountEffects - 2;
-            height = 27 + 5;
+            width = (ICON_WIDTH + 2) * amountEffects - 2;
+            height = ICON_WIDTH + 5;
         } else {
-            width = 27;
-            height = (27 + 7) * amountEffects - 7;
+            if (MWEConfig.showPotionEffectNames) {
+                width = ICON_WIDTH + 4 + maxWidth;
+            } else {
+                width = ICON_WIDTH;
+            }
+            height = (ICON_WIDTH + 7) * amountEffects - 7;
         }
         final int xDrawPots = this.guiPosition.getAbsoluteRenderX() - width / 2;
         final int yDrawPots = this.guiPosition.getAbsoluteRenderY() - height / 2;
@@ -86,16 +112,35 @@ public class PotionHUD extends AbstractRenderer {
                 GlStateManager.scale(2d / 3d, 2d / 3d, 2d / 3d);
                 GlStateManager.translate(-xDrawPots, -yDrawPots, 0d);
                 final String potDuration = potioneffect.getDuration() > 60 * 60 * 20 ? "**:**" : Potion.getDurationString(potioneffect);
-                final String potionLevel = ChatUtil.intToRoman(potioneffect.getAmplifier() + 1);
-                fr.drawStringWithShadow(potDuration, xDrawPots + 27 - fr.getStringWidth(potDuration) - 1, yDrawPots + 27 - fr.FONT_HEIGHT + 5, MWEConfig.potionHUDTextColor);
-                fr.drawStringWithShadow(potionLevel, xDrawPots + 27 - fr.getStringWidth(potionLevel) - 1, yDrawPots, MWEConfig.potionHUDTextColor);
-                if (MWEConfig.horizontalPotionHUD) {
-                    xDrawPots += 27 + 2;
+                final int ICON_WIDTH = 27;
+                if (!MWEConfig.horizontalPotionHUD && MWEConfig.showPotionEffectNames) {
+                    final String fullName = getFormattedEffect(potioneffect, potion);
+                    fr.drawStringWithShadow(fullName, xDrawPots + ICON_WIDTH + 4, (float) (yDrawPots + ICON_WIDTH / 2 - fr.FONT_HEIGHT + 1), MWEConfig.potionHUDTextColor);
+                    fr.drawStringWithShadow(potDuration, xDrawPots + ICON_WIDTH + 4, (float) (yDrawPots + ICON_WIDTH / 2 + 2), MWEConfig.potionHUDTextColor);
                 } else {
-                    yDrawPots += 27 + 7;
+                    fr.drawStringWithShadow(potDuration, xDrawPots + ICON_WIDTH - fr.getStringWidth(potDuration) - 1, yDrawPots + ICON_WIDTH - fr.FONT_HEIGHT + 5, MWEConfig.potionHUDTextColor);
+                    if (potioneffect.getAmplifier() != 0) {
+                        final String potionLevel = ChatUtil.intToRoman(potioneffect.getAmplifier() + 1);
+                        fr.drawStringWithShadow(potionLevel, xDrawPots + ICON_WIDTH - fr.getStringWidth(potionLevel) - 1, yDrawPots, MWEConfig.potionHUDTextColor);
+                    }
+                }
+                if (MWEConfig.horizontalPotionHUD) {
+                    xDrawPots += ICON_WIDTH + 2;
+                } else {
+                    yDrawPots += ICON_WIDTH + 7;
                 }
             }
         }
+    }
+
+    private static String getFormattedEffect(PotionEffect potioneffect, Potion potion) {
+        final String name;
+        if (potioneffect.getAmplifier() == 0) {
+            name = I18n.format(potion.getName());
+        } else {
+            name = I18n.format(potion.getName()) + " " + ChatUtil.intToRoman(potioneffect.getAmplifier() + 1);
+        }
+        return name;
     }
 
 }
