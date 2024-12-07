@@ -51,9 +51,9 @@ public class ReportQueue {
                 final String playername = queueList.remove(0).name;
                 final String msg = "/wdr " + playername;
                 ChatUtil.sendChatMessage(msg, true);
-                standStillLimit = 20 + random.nextInt(11);
+                standStillLimit = 5 + random.nextInt(11);
                 standStillCounter = 0;
-                betweenReportCounter = 50;
+                betweenReportCounter = 15;
                 ChatHandler.deleteStopMovingInstruction();
             }
         } else {
